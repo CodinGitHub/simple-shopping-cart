@@ -1,22 +1,26 @@
-/* Todos los elementos de las cart */
-let cart = document.querySelector('.cart-items');
+let cart; /* Todos los articulos de los carros */
+
+function getTotalItems(){
+    return cart = document.querySelector('.cart-items');
+}
 
 /*----------------Remover articulos------------------------- */
-let removeItemsCartButtons = document.getElementsByClassName('btn-danger');
+
+updateCartTotal()
+let removeItemsCartButtons = cart.getElementsByClassName('btn-danger');
 removeItemsCartButtons = [...removeItemsCartButtons]
 removeItemsCartButtons.forEach(element => {
     element.addEventListener('click', (event)=>{
         let buttonClicked = event.target;
         buttonClicked.parentElement.parentElement.remove();
         updateNumberOfElements()
-        updateCartTotal()
+        console.log(updateCartTotal())
     }); 
 });
 
-updateCartTotal()
 
 function updateNumberOfElements(){
-    cart = document.querySelector('.cart-items');
+    
     numericInputs = document.querySelectorAll('.cart-quantity-input');
     numericInputs = [...numericInputs]
 
@@ -29,11 +33,11 @@ function updateNumberOfElements(){
             buttonClicked.parentElement.parentElement.remove();
             updateNumberOfElements()
             updateCartTotal()
+            console.log(updateCartTotal())
         }); 
     });
 
-    /*---------------------------Actualizar numero de items----------------------------------*/
-    console.log(numericInputs)
+    /*---Actualizar numero de items cuando se presiona el input numerico-------*/
     numericInputs.forEach(item => {
         item.addEventListener('click', event => {
             // updateNumberOfElements()
@@ -49,26 +53,32 @@ function updateNumberOfElements(){
 
 
 function updateCartTotal(){
-    cart = document.querySelector('.cart-items');
-    let listaActualizada = document.getElementsByClassName('cart-row');
+    cart = getTotalItems();
+    let listaActualizada = cart.getElementsByClassName('cart-row');
     listaActualizada = [...listaActualizada]
-    // console.log(listaActualizada)
+ 
 
     let total = 0;
+    let todosLosArticulos = [];
     listaActualizada.forEach((item, index) => {
-            if (index != 0){
+            // if (index != 0){
                 let precio = parseFloat(item.childNodes[3].innerText.substring(1));
-                let cant = parseFloat(item.childNodes[5].childNodes[1].value);   
+                let cant = parseFloat(item.childNodes[5].childNodes[1].value);
                 total = precio*cant + total;
                 total = parseFloat(total.toFixed(2));
-            }
+
+                //Actualico el arreglo todosLosArticulos con todos los nombres
+                let names = (item.childNodes[1].childNodes[3].innerText)
+                todosLosArticulos.push(names)
+
+            // }
     })
 
     /*---------------Imprimir total en pantalla------------- */
     let totalContainer = document.querySelector('.cart-total-price');
     
     totalContainer .innerText = `$${total}`;
-    return cart;
+    return todosLosArticulos;
 }
 
 /*---------------------------Actualizar numero de items----------------------------------*/
@@ -95,13 +105,19 @@ addBtn.forEach(singleAddBtn => {
     singleAddBtn.addEventListener('click', event=>{
         
         let priceItem = parseFloat(event.target.parentElement.childNodes[1].innerText.substring(1));
+        let imgItem = event.target.parentElement.parentElement.childNodes[3].src;
+        let nameItem = event.target.parentElement.parentElement.childNodes[1].innerText;
         
-        // console.log(priceItem)
+        //Verificar si el item se encuentra en el carro de compras
+        // let todosLosArticulos = updateCartTotal()
+        // console.log(updateCartTotal())
+        // console.log(todosLosArticulos)
+        
         cart.innerHTML += `
         <div class="cart-row">
             <div class="cart-item cart-column">
-                <img class="cart-item-image" src="Images/Shirt.png" width="100" height="100">
-                <span class="cart-item-title">T-Shirt</span>
+                <img class="cart-item-image" src="${imgItem}" width="100" height="100">
+                <span class="cart-item-title">${nameItem}</span>
             </div>
             <span class="cart-price cart-column">$${priceItem}</span>
             <div class="cart-quantity cart-column">
@@ -110,7 +126,8 @@ addBtn.forEach(singleAddBtn => {
             </div>
         </div>
         `
-        updateNumberOfElements()
+        // updateNumberOfElements()
         updateCartTotal()
+        cart = getTotalItems();
     })
 } )
