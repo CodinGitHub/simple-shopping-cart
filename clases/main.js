@@ -1,9 +1,8 @@
 import {ShopItem} from './clases.js';
 
-let shopItemsArray = [];
-let cartItemsArray = [];
-let shoppingcart = [];
-let total = 0;
+let shopItemsArray = []; // productos disponible para comprar
+let shoppingcart = []; // Carro de compras
+let total = 0; // Valor total de la factura
 
 // Crear los objetos disponibles en la tienda
 let shopItems = document.querySelectorAll('.shop-item');
@@ -13,14 +12,14 @@ shopItems.forEach((shopItem, index)=>{
     let description = shopItem.childNodes[1].innerText;
     let img = shopItem.childNodes[3].src.substring(21);
     let price = parseFloat(shopItem.childNodes[5].childNodes[1].innerText.substring(1));
-    let album = new ShopItem(index, img, description, price, 1)    
-    shopItemsArray.push(album)
+
+    // Creo un arreglo con todos los productos disponibles para comprar. A partir de la clase.
+    let products = new ShopItem(index, img, description, price, 1)    
+    shopItemsArray.push(products)
 })
 
-console.log(shopItemsArray)
 
-
-// Crear los objetos disponibles dentro del carro de compras
+// Selecciono el carro de compras
 let cart = document.querySelector('.cart-items');
 
 /*--------------------------Agregar productos al carro--------------------------*/
@@ -28,23 +27,22 @@ let addBtn = document.querySelectorAll('.shop-item-button');
 addBtn = [...addBtn];
 
 addBtn.forEach((singleAddBtn, index) => {
-    singleAddBtn.addEventListener('click', event=>{
-        // agrego el elemnto al carro
-        
+    singleAddBtn.addEventListener('click', event=>{  
 
         // consulto si el item existe para aumentar su cantidad
         let itemRepeated = shoppingcart.find(item => item.id == index)
         if (itemRepeated != undefined){
             itemRepeated.quantity += 1;
         }else{
+            // agrego el elemento al carro
             shoppingcart.push(shopItemsArray[index]);
         }
-        total = getTotal(shoppingcart)
+        total = getTotal()
         drawItems()
     })
 } )
 
-
+// Dibujo los articulos dentro del carro
 function drawItems(){
     cart.innerHTML = '';
     shoppingcart.forEach(cartItem =>{
@@ -66,34 +64,46 @@ function drawItems(){
     /*---------------Imprimir total en pantalla------------- */
     let totalContainer = document.querySelector('.cart-total-price');
     
-    totalContainer .innerText = `$${total}`;
-
+    totalContainer.innerText = `$${total}`;
+    updateNumberOfItems()
+    removeItems()
 }
 
 
 /*--------------------------Remover productos del carro--------------------------*/
-let removeItemsCartButtons = document.getElementsByClassName('btn-danger');
-removeItemsCartButtons = [...removeItemsCartButtons]
+function removeItems(){
+    let removeItemsCartButtons = document.getElementsByClassName('btn-danger');
+    removeItemsCartButtons = [...removeItemsCartButtons]
 
-removeItemsCartButtons.forEach(element => {
-    element.addEventListener('click', (event)=>{
-        console.log('remover')
-        // cartItemsArray.find(element.)
-    }); 
-});
+    removeItemsCartButtons.forEach(element => {
+        element.addEventListener('click', (event)=>{ 
+            // conseguir el ID del objeto dentro del arreglo
+            let itemName = event.target.parentElement.parentElement.childNodes[1].innerText;
+            let actualObject = shoppingcart.find(item => item.description == itemName);
+            actualObject.quantity = 1;
+            let actualIndex = shoppingcart.findIndex(item => item == actualObject);
+            // remover el objeto del arreglo shopppingcart
+            shoppingcart.splice(actualIndex,actualIndex+1)
+            // Dibujar
+            total = getTotal()
+            drawItems()
+        }); 
+    });
+}
 
 /*--------------Obtener valor total -------------*/
 function getTotal(){
-    return shopItemsArray.reduce((sum, item)=>{
-        console.log(item.price)
-        return sum + item.price*item.quantity
+    let sumTotal = 0;
+    return shoppingcart.reduce((sum, item)=>{
+        sumTotal = sum + item.price*item.quantity;
+        sumTotal = parseFloat(sumTotal.toFixed(2));
+        return sumTotal;
     },0)
 }
 
-
-
+// Actualizar numero de items
 function updateNumberOfItems(){
-    /*---------------------------Actualizar numero de items----------------------------------*/
+    
     let numericInputs = document.querySelectorAll('.cart-quantity-input');
     numericInputs = [...numericInputs]
     numericInputs.forEach(item => {
@@ -104,19 +114,12 @@ function updateNumberOfItems(){
             
             //actualizar el objeto item
             productWithId.quantity = parseInt(event.target.value)
-            console.log(shoppingcart)
 
             //actualizar el precio total
-            total = getTotal(shoppingcart)
+            total = getTotal()
 
             //dibujar
-            
             drawItems()
         });
-        item.addEventListener('keydown', event => {
-
-            total = getTotal(shoppingcart)
-        });
     })
-    updateNumberOfItems()
 }
