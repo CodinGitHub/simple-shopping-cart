@@ -1,12 +1,16 @@
 import {ShopItem} from './clases.js';
 
+window.onload = () => {
+    console.log('pagina recargada')
+};
+
 let shopItemsArray = []; // productos disponible para comprar
 let shoppingcart = []; // Carro de compras
 let total = 0; // Valor total de la factura
 
 // Crear los objetos disponibles en la tienda
-let shopItems = document.querySelectorAll('.shop-item');
-shopItems = [...shopItems];
+// let shopItems = document.querySelectorAll('.shop-item');
+// shopItems = [...shopItems];
 
 // shopItems.forEach((shopItem, index)=>{
 //     let description = shopItem.childNodes[1].innerText;
@@ -19,39 +23,43 @@ shopItems = [...shopItems];
     
 // })
 
-// let datos = JSON.stringify(shopItemsArray)
-// console.log(datos)
+// let json = JSON.stringify(shopItemsArray)
+// console.log(json);
 
-// fetch('http://127.0.0.1:5500/clases/datos.json')
-fetch('https://api.escuelajs.co/api/v1/products')
-.then(ressul => ressul.json())
-.then(shopItemsArray => { 
+console.log("Hola2")
+
+// consumir objetos a partir de JSON
+fetch('http://127.0.0.1:5500/clases/datos.json')
+
+// fetch('https://api.escuelajs.co/api/v1/products')
+.then(data => data.text())
+.then(json => {
     
-    shopItemsArray.splice(6, shopItemsArray.length)
+    shopItemsArray = JSON.parse(json)
     console.log(shopItemsArray)
 
-    // Agregar cantidad a los objetos
-    shopItemsArray.forEach(element => {
-        element.quantity = 1
-    });
-
+    //Agregar quantity a los objetos
+    shopItemsArray.forEach(item =>{
+        item.quantity = 1;
+    })
     console.log(shopItemsArray)
 
 
 
-    let merch = document.querySelector('.shop-items');
-
-    shopItemsArray.forEach(element => {
-        merch.innerHTML += `
+    //selecciono la tienda
+    let store = document.querySelector('.shop-items');
+    
+    for(let i = 0; i<=3; i++){
+        store.innerHTML += `
         <div class="shop-item">
-            <span class="shop-item-title">${element.title}</span>
-            <img class="shop-item-image" src="${element.images[0]}">
+            <span class="shop-item-title">${shopItemsArray[i].title}</span>
+            <img class="shop-item-image" src="${shopItemsArray[i].images[0]}">
             <div class="shop-item-details">
-                <span class="shop-item-price">$${element.price}</span>
+                <span class="shop-item-price">$${shopItemsArray[i].price}</span>
                 <button class="btn btn-primary shop-item-button" type="button">ADD TO CART</button>
             </div>
         </div>`
-    });
+    }
 
     // Selecciono el carro de compras
     let cart = document.querySelector('.cart-items');
@@ -62,20 +70,19 @@ fetch('https://api.escuelajs.co/api/v1/products')
 
     addBtn.forEach((singleAddBtn, index) => {
         singleAddBtn.addEventListener('click', event=>{  
-
+            
             // consulto si el item existe para aumentar su cantidad
             console.log(shoppingcart)
-
-            // conseguir el ID del objeto dentro del arreglo
-            let itemName = event.target.parentElement.parentElement.childNodes[1].innerText;
-
-            let itemRepeated = shoppingcart.find(item => item.title == itemName)
+            let itemRepeated = shoppingcart.find(item => item.id == index)
+            console.log(itemRepeated);
             if (itemRepeated != undefined){
                 itemRepeated.quantity += 1;
+                console.log('click')
             }else{
-                // agrego el elemento al carro
+                // agrego el elemento al carro en caso de que no exista
                 shoppingcart.push(shopItemsArray[index]);
             }
+            console.log(shoppingcart)
             total = getTotal()
             drawItems()
         })
@@ -162,10 +169,4 @@ fetch('https://api.escuelajs.co/api/v1/products')
             });
         })
     }
-
-
-
 });
-
-
-
